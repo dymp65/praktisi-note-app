@@ -58,4 +58,36 @@ class DbHelper {
     var dbClient = await _db;
     return await dbClient!.insert(tableName, note.toMap());
   }
+
+  //Update data
+  Future<int?> updateNote(NoteModel note) async {
+    var dbClient = await _db;
+
+    return await dbClient!.update(tableName, note.toMap(),
+        where: '$columnId = ?', whereArgs: [note.id]);
+  }
+
+  //Delete data
+  Future<int?> deleteNote(int id) async {
+    var dbClient = await _db;
+
+    return await dbClient!
+        .delete(tableName, where: '$columnId = ?', whereArgs: [id]);
+  }
+
+  //Get Note by ID
+  Future<dynamic> getNoteById(int id) async {
+    var dbClient = await _db;
+
+    var result = await dbClient!.query(tableName,
+        columns: [
+          columnId,
+          columnNote,
+          columnTitle,
+        ],
+        where: '$columnId = ?',
+        whereArgs: [id]);
+
+    return result;
+  }
 }

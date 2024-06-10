@@ -43,6 +43,23 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  Future<void> _updateNote(NoteModel note) async {
+    var result = await Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => DetailNotePage(note: note)));
+
+    if (result == 'update') {
+      await _getAllNote();
+    }
+  }
+
+  Future<void> _deleteNote(NoteModel note, int index) async {
+    await db.deleteNote(note.id!);
+
+    setState(() {
+      listNote.removeAt(index);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,8 +101,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
             return GestureDetector(
               onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => DetailNotePage(note: note)));
+                _updateNote(note);
+              },
+              onDoubleTap: () {
+                showDeleteDialog(context, note, index);
               },
               child: _itemCard(note),
             );
@@ -115,6 +134,51 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
+    );
+  }
+
+  showDeleteDialog(BuildContext context, NoteModel note, int index) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Apakah mau menghapus note ini?'),
+          actions: [
+            ElevatedButton(
+              onPressed: () async {
+                //fungsi date ke database
+                await _deleteNote(note, index);
+                Navigator.maybePop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+              ),
+              child: const Expanded(
+                  child: Text(
+                'Ya',
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              )),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.maybePop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+              ),
+              child: const Expanded(
+                  child: Text(
+                'Tidak',
+                style: TextStyle(
+                  color: Colors.black,
+                ),
+              )),
+            )
+          ],
+        );
+      },
     );
   }
 }
